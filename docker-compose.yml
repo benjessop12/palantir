@@ -1,0 +1,31 @@
+---
+version: "3.5"
+
+x-palantir-common: &palantir-common
+  image: palantir:latest
+  links:
+    - "postgresql:db"
+  volumes:
+    - type: bind
+      source: .
+      target: /app
+    - "./config/palantir_docker_compose.yml:/config/databse.yml"
+
+x-palantir-env-common: &palantir-env-common
+  PGHOST: "postgresql"
+  PGPORT: "5432"
+  PGUSER: "postgres"
+  PGPASSWORD: "password"
+
+services:
+  palantir:
+    <<: *palantir-common
+    ports: ["4022:3000", "8989:8989"]
+    environment: *palantir-env-common
+    command: tail -f /dev/null
+
+  postgresql:
+    image: "postgres:12.4-alpine"
+    ports: ["4031:5432"]
+    environment:
+      POSTGRES_PASSWORD: password

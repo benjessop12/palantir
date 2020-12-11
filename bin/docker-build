@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -euo pipefail
+
+cp .gitignore .dockerignore
+
+sed -E -i.bak -e '/^\/?vendor\/cache/d' .dockerignore
+
+bundle cache
+docker build --tag palantir:latest .

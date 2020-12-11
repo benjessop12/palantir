@@ -1,0 +1,19 @@
+---
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RUBY_MAX_THREADS") { 5 } %>
+  timeout: 5000
+  host: localhost
+  port: 4031
+  user: postgres
+  username: postgres
+  password: password
+
+development:
+  <<: *default
+  database: palantir_dev
+
+test:
+  <<: *default
+  database: palantir_test

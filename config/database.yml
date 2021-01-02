@@ -9,11 +9,4 @@ default: &default
   user: postgres
   username: postgres
   password: password
-
-development:
-  <<: *default
-  database: palantir_dev
-
-test:
-  <<: *default
-  database: palantir_test
+  database: palantir

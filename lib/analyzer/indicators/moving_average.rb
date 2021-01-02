@@ -6,43 +6,20 @@ module Palantir
       class MovingAverage
         include ::Palantir::HelperFunctions
 
-        # to create a series of averages of different subsets of the full dataset
-        # is a mitigator for short-term fluctiations in ticker price
-
-        # include a method to indicate lag
-        # a.k.a a long lookback period has more lag
-        # which is not necessarily a bad thing
-        # it just means the forecast might take longer to hit
-        # that a short sample
-        # the shorter the time span the more sensitive
-        # it is to price changes
-
-        # simple moving average
-        # arithmetic mean of given set of values
-        # array.sum / array.count
-
-        # exponential moving average
-        # gives more weight to recent prices
-        # smoothing factor =
-        #   [2 / (number of days + 1)]
-        # EMA = value_today * \
-        #   (smoothing / (1 + number of days)) + \
-        #   EMA yesterday * [1 - *(smoothing / (1 + number of days))]
-
         INCREMENT = 1
         SEGMENT = 2
 
         attr_reader :input_data, \
-                    :count, \
+                    :ticker,
+                    :count,
                     :sum
 
-        def initialize(input_data: nil)
+        def initialize(input_data: nil, ticker: nil)
           @input_data = input_data
+          @ticker = ticker
           @count = input_data&.count.to_i
           @sum = input_data&.sum.to_i
         end
-
-        private
 
         def simple
           sum / count
@@ -51,6 +28,8 @@ module Palantir
         def exponential
           exponential_primer(scope: :current) + previous_ema * weighting
         end
+
+        private
 
         def exponential_primer(scope: nil)
           (
@@ -64,14 +43,18 @@ module Palantir
           if first_time?
             simple
           else
-            exponential_primer(scope: :former)
+            mark_ticker(value: exponential_primer(scope: :former))
           end
         end
 
         def first_time?
-          # do you have the data
-          # make a db accessor
-          # get_var last_exponential helper
+          in_db = Palantir::Database.get_var name: ticker
+          !in_db.flatten.empty?
+        end
+
+        def mark_ticker(value: nil)
+          Palantir::Database.save_var name: ticker, value: value
+          value
         end
 
         def weighting

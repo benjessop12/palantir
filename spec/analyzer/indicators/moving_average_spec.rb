@@ -5,18 +5,22 @@ require_relative '../../../lib/palantir'
 describe Palantir::Analyzer::Indicators::MovingAverage do
   context 'when given data' do
     let(:base_data_array) { [*1..20] }
-    let(:base_dummy_class) { described_class.new(input_data: base_data_array) }
+    let(:base_dummy_class) { described_class.new(input_data: base_data_array, ticker: 'PLTR') }
 
     describe 'simple' do
       it 'returns an accurate simple moving average' do
-        expect(base_dummy_class.send(:simple)).to eq(10)
+        expect(base_dummy_class.simple).to eq(10)
       end
     end
 
     describe 'exponential' do
       context 'when the input data is on a strong uptrend' do
+        before do
+          allow(base_dummy_class).to receive(:first_time?).and_return(false)
+        end
+
         it 'provides an accurate exponential moving average' do
-          expect(base_dummy_class.send(:exponential).ceil(4)).to eq(0.1765)
+          expect(base_dummy_class.exponential.ceil(4)).to eq(0.1765)
         end
       end
     end
@@ -62,7 +66,36 @@ describe Palantir::Analyzer::Indicators::MovingAverage do
     end
 
     describe 'first_time?' do
-      # todo
+      context 'when the var exists in the database' do
+        before do
+          allow(Palantir::Database).to receive(:get_var).and_return([['something']])
+        end
+
+        it 'returns true' do
+          expect(base_dummy_class.send(:first_time?)).to eq(true)
+        end
+      end
+
+      context 'when the var does not exist in the database' do
+        before do
+          allow(Palantir::Database).to receive(:get_var).and_return([[]])
+        end
+
+        it 'returns false' do
+          expect(base_dummy_class.send(:first_time?)).to eq(false)
+        end
+      end
+    end
+
+    describe 'mark_ticker' do
+      before do
+        allow(Palantir::Database).to receive(:save_var)
+      end
+
+      it 'sends a request to the databse' do
+        base_dummy_class.send(:mark_ticker, value: 'value')
+        expect(Palantir::Database).to have_received(:save_var).with(name: 'PLTR', value: 'value')
+      end
     end
 
     describe 'weighting' do

@@ -5,26 +5,6 @@ module Palantir
     class Indicators
       class RelativeStrengthIndex
         include ::Palantir::HelperFunctions
-        # measure magnitude of recent price changes
-        # and evaluate overbought or oversold conditions
-
-        # value of 70 or more indicate security is overbought or overvalued and primed
-        # for a trend reversal or corrective pullback
-        # RSI of 30 or below indicates oversold or undervalued condition
-        # RSI_step_one = 100 - [ 100 \ 1 + [ average_gain \ average loss]]
-        # average gain or loss used in the calculation is the average percentage
-        # gain or loss during a look-back period. Use a positive value for the average loss
-        # standard to use 14 periods to calculate the initial RSI
-
-        # RSI_step_two = 100 - [ 100 \ 1 + [ ((previous_average_gain x 13) + current gain)
-        # \ - ((previous_average_loss x 13) + current loss)]]
-
-        # RSI will rise as the number and size of positive closes
-        # increase and falls the number and size of losses increase.
-
-        # up periods are characterized by the close being higher than the previous close
-        # down periods are characterized by the close being lower than the pervious period's
-        # down periods can ONLY be a positive number
 
         TOP_STRENGTH_LEVEL = 100
         STRENGTH_INCREMENT = 1
@@ -71,7 +51,7 @@ module Palantir
         def rsi_step_two
           with_relative_strength do
             ((average(type: :gain, scope: :previous) * trimmed_count) + average(type: :gain, scope: :current)) \
-              / ((average(type: :loss, scope: :previous) * trimmed_count) + average(type: :gain, scope: :current))
+              / ((average(type: :loss, scope: :previous) * trimmed_count) + average(type: :loss, scope: :current))
           end
         end
 

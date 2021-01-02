@@ -106,7 +106,7 @@ describe Palantir::Analyzer::Indicators::RelativeStrengthIndex do
       end
 
       it 'returns an extrordinarily strong rsi score' do
-        expect(dummy_class.send(:rsi_step_two)).to eq(99)
+        expect(dummy_class.send(:rsi_step_two)).to eq(100)
       end
     end
   end

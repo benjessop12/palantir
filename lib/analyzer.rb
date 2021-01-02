@@ -38,8 +38,8 @@ module Palantir
     private
 
     def analyze(ticker: nil)
-      ::Palantir::Clients::GoogleClient.get_ticker(ticker)
-      # store in database
+      data = ::Palantir::Clients::GoogleClient.get_ticker(ticker)
+      ::Palantir::Database.save_var name: ticker, value: data[:value], at_date: data[:request_time]
       # analyze trend
       # write to stdout
     end

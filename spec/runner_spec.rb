@@ -3,6 +3,10 @@
 require_relative '../lib/palantir'
 
 describe Palantir::Runner do
+  before do
+    stub_const('Palantir::TICKER_CONFIG_FILE', 'config/ticker_config.yml.test')
+  end
+
   describe 'run!' do
     context 'when tickers are defined' do
       before do

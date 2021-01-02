@@ -10,6 +10,7 @@
 end
 
 require_relative 'analyzer'
+require_relative 'database'
 require_relative 'logger'
 require_relative 'runner'
 
@@ -18,6 +19,7 @@ module Palantir
 
   LOG_FILE_PATH = 'tmp/core_log.txt'
   TICKER_CONFIG_FILE = 'config/ticker_config.yml'
+  DB_CONFIG_FILE = 'config/database.yml'
 
   def logger
     ::Palantir::Logger.new(

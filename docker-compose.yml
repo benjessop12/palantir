@@ -9,7 +9,7 @@ x-palantir-common: &palantir-common
     - type: bind
       source: .
       target: /app
-    - "./config/palantir_docker_compose.yml:/config/databse.yml"
+    - "./config/palantir_docker_compose.yml:/config/database.yml"
 
 x-palantir-env-common: &palantir-env-common
   PGHOST: "postgresql"

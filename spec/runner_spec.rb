@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'timecop'
+
 require_relative '../lib/palantir'
 
 describe Palantir::Runner do
@@ -108,6 +110,122 @@ describe Palantir::Runner do
     context 'when the TICKERS env variable is not defined' do
       it 'returns an empty array' do
         expect(described_class.send(:tickers_from_env)).to eq([])
+      end
+    end
+  end
+
+  describe 'run_until' do
+    context 'when RUN_UNTIl env variable is defined' do
+      before do
+        ENV['RUN_UNTIL'] = '12:00'
+        Timecop.freeze(Time.local(2020))
+      end
+
+      after do
+        ENV.delete('RUN_UNTIL')
+        Timecop.return
+      end
+
+      it 'returns the env variable as time' do
+        expect(described_class.send(:run_until)).to eq(Time.parse('2020-01-01 12:00'))
+      end
+    end
+
+    context 'when RUN_UNTIL env variable is not defined' do
+      it 'returns infinity' do
+        expect(described_class.send(:run_until)).to eq(Float::INFINITY)
+      end
+    end
+  end
+
+  describe 'convert_run_until' do
+    context 'when run_until is a valid time' do
+      before do
+        Timecop.freeze(Time.local(2020))
+      end
+
+      after do
+        Timecop.return
+      end
+
+      it 'parses the string to time' do
+        expect(described_class.send(:convert_run_until, run_until: '12:00')).to eq(Time.parse('2020-01-01 12:00'))
+      end
+    end
+
+    context 'when run_until is not a valid time' do
+      it 'returns infinity' do
+        expect(described_class.send(:convert_run_until, run_until: 'invalid')).to eq(Float::INFINITY)
+      end
+    end
+  end
+
+  describe 'interval' do
+    context 'when the INTERVAL env variable is set' do
+      after do
+        ENV.delete('INTERVAL')
+      end
+
+      context 'when the env variable is valid' do
+        before do
+          ENV['INTERVAL'] = '2.minutes'
+        end
+
+        it 'returns the defined interval in integer seconds as interval' do
+          expect(described_class.send(:interval)).to eq(120)
+        end
+      end
+
+      context 'when the env variable is not valid' do
+        before do
+          ENV['INTERVAL'] = '1minute'
+        end
+
+        it 'returns the BASE_INTERVAL as interval' do
+          expect(described_class.send(:interval)).to eq(Palantir::Runner::BASE_INTERVAL)
+        end
+      end
+    end
+
+    context 'when the INTERVAL env variable is not set' do
+      it 'returns the BASE_INTERVAL as interval' do
+        expect(described_class.send(:interval)).to eq(Palantir::Runner::BASE_INTERVAL)
+      end
+    end
+  end
+
+  describe 'invalid_interval?' do
+    context 'when the interval is valid' do
+      it 'returns true' do
+        expect(described_class.send(:invalid_interval?, interval: '1.minute')).to eq(false)
+      end
+    end
+
+    context 'when the interval is not valid' do
+      context 'due to invalid count' do
+        it 'returns true' do
+          expect(described_class.send(:invalid_interval?, interval: 'not.minute')).to eq(true)
+        end
+      end
+
+      context 'due to invalid metric' do
+        it 'returns true' do
+          expect(described_class.send(:invalid_interval?, interval: '1.secon')).to eq(true)
+        end
+      end
+
+      context 'due to invalid seperator' do
+        it 'returns true' do
+          expect(described_class.send(:invalid_interval?, interval: '1second')).to eq(true)
+        end
+      end
+    end
+  end
+
+  describe 'convert_interval' do
+    context 'when given a valid interval' do
+      it 'converts the string to integer seconds' do
+        expect(described_class.send(:convert_interval, interval: '2.minutes')).to eq(120)
       end
     end
   end

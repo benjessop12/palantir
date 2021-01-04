@@ -23,3 +23,6 @@ Metrics/BlockLength:
 
 Metrics/ModuleLength:
   Max: 300
+
+Metrics/ParameterLists:
+  Max: 6

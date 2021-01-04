@@ -71,7 +71,7 @@ The RSI will rise as the number and size of positive closes increase and alls th
 
 #### Fun code stuff
 
-There is a question of using Docker in a gem, to which I say: I'm still developing it _(tm)_.
+There is a question of using Docker in a gem, to which I say: I'm still developing it _(tm)_ and this will more-likely-be an app with redis/sidekiq handling jobs rather than the threading as it happens now, but that's un-important compared to the analysis. The frank truth is this logic is attempting to do more than the role-of-responsibility of an atypical gem, but I like to ask the question 'when can we try to use docker in a gem' to which I say, 'whenever you want'
 
 The dockerfile pulls from the alpine image and aims to use as minimal packages as possible to keep the project liteweight.
 

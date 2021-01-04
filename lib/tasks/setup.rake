@@ -20,6 +20,6 @@ def write_to_config(tickers)
 end
 
 def create_db
-  create_var_table = 'CREATE TABLE IF NOT EXISTS variables (name varchar, value varchar, at_date date)'
+  create_var_table = 'CREATE TABLE IF NOT EXISTS variables (name varchar, value varchar, at_date date, created_at date)'
   ::Palantir::Database.query(sql: create_var_table)
 end

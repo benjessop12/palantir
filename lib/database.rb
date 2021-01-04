@@ -12,14 +12,14 @@ module Palantir
     extend Connection
 
     def save_var(name: nil, value: nil, at_date: nil)
-      sql_format = "INSERT INTO variables(name, value, at_date) VALUES ('%s', '%s', '%s')"
+      sql_format = "INSERT INTO variables(name, value, at_date, created_at) VALUES ('%s', '%s', '%s', '%s')"
       date = at_date.nil? ? Time.now : at_date
-      sql = format(sql_format, name, value, date.strftime('%Y-%m-%d'))
+      sql = format(sql_format, name, value, date.strftime('%Y-%m-%d'), Time.now.strftime('%Y-%m-%d'))
       query(sql: sql)
     end
 
     def get_var(name: nil)
-      sql_format = "SELECT value, at_date FROM variables WHERE name == '%s'"
+      sql_format = "SELECT value, at_date FROM variables WHERE name = '%s'"
       sql = format(sql_format, name)
       query(sql: sql, values: true)
     end

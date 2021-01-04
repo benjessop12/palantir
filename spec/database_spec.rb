@@ -22,7 +22,8 @@ describe Palantir::Database do
       it 'sends valid sql for querying' do
         described_class.save_var(name: 'PLTR', value: 'test', at_date: Time.parse('2020-02-01'))
         expect(described_class).to have_received(:query)
-          .with(sql: "INSERT INTO variables(name, value, at_date) VALUES ('PLTR', 'test', '2020-02-01')")
+          .with(sql: 'INSERT INTO variables(name, value, at_date, created_at) VALUES ' \
+                     "('PLTR', 'test', '2020-02-01', '2020-01-01')")
       end
     end
 
@@ -30,7 +31,8 @@ describe Palantir::Database do
       it 'sends valid sql for querying' do
         described_class.save_var(name: 'PLTR', value: 'test')
         expect(described_class).to have_received(:query)
-          .with(sql: "INSERT INTO variables(name, value, at_date) VALUES ('PLTR', 'test', '2020-01-01')")
+          .with(sql: 'INSERT INTO variables(name, value, at_date, created_at) VALUES ' \
+                     "('PLTR', 'test', '2020-01-01', '2020-01-01')")
       end
     end
   end
@@ -39,7 +41,7 @@ describe Palantir::Database do
     it 'sends valid sql for querying' do
       described_class.get_var(name: 'PLTR')
       expect(described_class).to have_received(:query)
-        .with(sql: "SELECT value, at_date FROM variables WHERE name == 'PLTR'", values: true)
+        .with(sql: "SELECT value, at_date FROM variables WHERE name = 'PLTR'", values: true)
     end
   end
 end

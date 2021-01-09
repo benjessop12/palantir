@@ -3,7 +3,7 @@
 require_relative '../../lib/palantir'
 
 describe Palantir::Analyzer::Indicators do
-  describe 'analysis_as_json' do
+  describe 'analysis_as_hash' do
     let(:input_data) { [*1...20] }
     let(:ticker) { 'PLTR' }
     let(:expected_output) do
@@ -15,9 +15,9 @@ describe Palantir::Analyzer::Indicators do
           rsi_step_one: 100.0,
           rsi_step_two: 100.0,
           current: 19,
-          sentiment: 'oversold'
+          sentiment: :oversold
         }
-      }.to_json
+      }
     end
 
     before do
@@ -25,8 +25,8 @@ describe Palantir::Analyzer::Indicators do
       allow(::Palantir::Database).to receive(:save_var)
     end
 
-    it 'returns the expected json' do
-      expect(described_class.analysis_as_json(input_data: input_data, ticker: ticker)).to eq(expected_output)
+    it 'returns the expected hash' do
+      expect(described_class.analysis_as_hash(input_data: input_data, ticker: ticker)).to eq(expected_output)
     end
   end
 end

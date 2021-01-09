@@ -49,9 +49,9 @@ module Palantir
 
     def analyze_data(historic_data: nil, ticker: nil)
       ticker_values = historic_data.map(&:first).map(&:to_f)
-      analysis_as_json = Palantir::Analyzer::Indicators.analysis_as_json(input_data: ticker_values, ticker: ticker)
-      warn analysis_as_json
-      logger.write(time: Time.now, message: analysis_as_json)
+      analysis_as_hash = Palantir::Analyzer::Indicators.analysis_as_hash(input_data: ticker_values, ticker: ticker)
+      warn analysis_as_hash.to_s
+      logger.write(time: Time.now, message: analysis_as_hash)
     end
 
     def search_for_information(defined_tickers: nil)

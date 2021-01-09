@@ -11,16 +11,16 @@ describe Palantir::Analyzer do
   describe 'analyze_data' do
     let(:historic_data) { [%w[1 2021-01-01]] }
     let(:ticker) { 'PLTR' }
-    let(:stub_json) { { stub: 'json' }.to_json }
+    let(:stub_hash) { { stub: 'json' }.to_s }
 
     before do
       allow(base_dummy_class).to receive(:warn)
-      allow(::Palantir::Analyzer::Indicators).to receive(:analysis_as_json).and_return(stub_json)
+      allow(::Palantir::Analyzer::Indicators).to receive(:analysis_as_hash).and_return(stub_hash)
     end
 
     it 'takes an array of arrays with ticker values at timepoints and performs analysis on them and logs to stdout' do
       base_dummy_class.send(:analyze_data, historic_data: historic_data, ticker: ticker)
-      expect(base_dummy_class).to have_received(:warn).with(stub_json)
+      expect(base_dummy_class).to have_received(:warn).with(stub_hash)
     end
   end
 

@@ -2,7 +2,7 @@
 
 ### Quick introduction
 
-Stock Analyzer. The bot scrapes stock data and analyses shill assertions to make informed predictions of the stock market using various indicator analysis methods.
+Stock Analyzer. The gem scrapes stock data and collects shill assertions to make informed predictions of the stock market using various indicator analysis methods.
 
 Palantir currently utilizes the following indicator analysis methods:
   - Moving Average
@@ -47,7 +47,7 @@ If it is the first time calculating the exponential moving average and yesterday
 
 ##### Relative Strength Index
 
-The relative strength index is the measure of magnitude of recent price changes and evaluates the overbought or oversold conditions. An RSI of over 70 indicates the security is overbought or overvalued and primed for a trend reversal or corrective pullback. An RSI of 30 or below indicates oversold or undervalued condition.
+The relative strength index is the measure of magnitude of recent price changes and evaluates the overbought or oversold conditions. An RSI of over 70 indicates the ticker is overbought or overvalued and primed for a trend reversal or corrective pullback. An RSI of 30 or below indicates oversold or undervalued condition.
 
 There are two stages to an RSI calculation:
 
@@ -69,9 +69,37 @@ Second stage:
 
 The RSI will rise as the number and size of positive closes increase and alls the number and size of losses increase. Up periods are characterized by the close being higher than the previous close. Down periods are characterized by the close being lower than the previous periods. Down periods can only be a positive number.
 
+#### Running
+
+To run the bot
+
+`bundle exec rake palantir:run`
+
+This analysis against the defined tickers and outputs the analysis to stdout.
+
+`INTERVAL=5.seconds`
+
+This flag is set to change the interval of ticker analysis. By default the analysis is every 3600 seconds. The interval takes an integer and one of the following `[second/minute/hour]` seperated by a full stop. If the passed integer cannot be parsed, the bot will default to the base 3600 seconds. Please be aware that short intervals often provide little to no value and usually provide lower quality analysis.
+
+`CONCURRENCY=3`
+
+Use at your own risk. Most users will not set this field as the gem auto-calculates the threads needed for processing. If you run on a lower spec system it may be beneficial to reduce the amount of threads that the bot runs. Be warned, you do not need to set a high thread limit in order to yield good analysis.
+
+`RUN_UNTIL=12:00`
+
+At the moment, this flag can only be set in the HH:MM format. If not set, the bot runs until a SIGTERM signal is received or an error code is yielded.
+
+`RUN_WILD=true`
+
+Set this if you are also passing a RUMOUR flag for the bot to go ahead and use shill sources to collect tickers to analyse without the user defining them. This feature is only enabled with bot the RUN_WILD and RUMOUR flag being set, so the user fully agrees to 'running_wild'.
+
+`RUMOUR=0.8`
+
+This flag will always take a float that is less than one. If the passed variable is not a float that is less than one, the bot will raise an error. The rumour ratio takes the count of defined tickers and calculates the percentage from the rumour, to hit integer 1, and allocates that many threads for rumour searching.
+
 #### Fun code stuff
 
-There is a question of using Docker in a gem, to which I say: I'm still developing it _(tm)_ and this will more-likely-be an app with redis/sidekiq handling jobs rather than the threading as it happens now, but that's un-important compared to the analysis. The frank truth is this logic is attempting to do more than the role-of-responsibility of an atypical gem, but I like to ask the question 'when can we try to use docker in a gem' to which I say, 'whenever you want'
+There is a question of using Docker in a gem, to which I say: I'm still developing it _(tm)_ and this will more-likely-be an app with redis/sidekiq handling jobs rather than the threading as it happens now, but that's un-important compared to the analysis. The frank truth is the gem logic is attempting to do more than the role-of-responsibility of an atypical gem, but I like to ask the question 'when can we try to use docker in a gem?' to which I say, 'whenever you want'
 
 The dockerfile pulls from the alpine image and aims to use as minimal packages as possible to keep the project liteweight.
 
@@ -87,4 +115,4 @@ Defined tickers are favoured when scraping for trends and reddit shill sourcing 
 
 ##### Logger
 
-I like loggers and I like trying to write my own. It's nothing special but it handles I/O streams quite well.
+The gem includes a custom made logger that stores important information like http_client request, response information and analysis.

@@ -7,7 +7,7 @@ module Palantir
   module Runner
     extend self
 
-    BASE_INTERVAL = 60
+    BASE_INTERVAL = 3600
     DEFAULT_CONCURRENCY = 5
     VALID_METRICS = {
       second: 1,

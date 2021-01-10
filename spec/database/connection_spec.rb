@@ -10,6 +10,10 @@ class StubClass
 end
 
 describe Palantir::Database::Connection do
+  before do
+    stub_const('ENV', 'TEST' => 'true')
+  end
+
   describe 'postgresql_connection' do
     context 'when given a config' do
       before do

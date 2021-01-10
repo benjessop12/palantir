@@ -12,14 +12,14 @@ module Palantir
     extend Connection
 
     def save_var(name: nil, value: nil, at_date: nil)
-      sql_format = "INSERT INTO variables(name, value, at_date, created_at) VALUES ('%s', '%s', '%s', '%s')"
+      sql_format = "INSERT INTO #{table_name}(name, value, at_date, created_at) VALUES ('%s', '%s', '%s', '%s')"
       date = at_date.nil? ? Time.now : at_date
       sql = format(sql_format, name, value, date.strftime('%Y-%m-%d'), Time.now.strftime('%Y-%m-%d'))
       query(sql: sql)
     end
 
     def get_var(name: nil)
-      sql_format = "SELECT value, at_date FROM variables WHERE name = '%s'"
+      sql_format = "SELECT value, at_date FROM #{table_name} WHERE name = '%s'"
       sql = format(sql_format, name)
       query(sql: sql, values: true)
     end
@@ -33,6 +33,12 @@ module Palantir
       YAML.safe_load(File.open(::Palantir::DB_CONFIG_FILE))
     rescue Errno::ENOENT
       nil
+    end
+
+    def table_name
+      return 'variables_test' if ENV['TEST']&.downcase == 'true'
+
+      'variables'
     end
   end
 end

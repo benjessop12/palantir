@@ -23,6 +23,10 @@ describe Palantir::Analyzer::Indicators::RelativeStrengthIndex do
   end
   let(:dummy_class) { described_class.new(input_data: dummy_data) }
 
+  before do
+    stub_const('ENV', 'TEST' => 'true')
+  end
+
   describe 'the general API' do
     context 'when supplied an array of more than 14 objects' do
       it 'does not raise error' do

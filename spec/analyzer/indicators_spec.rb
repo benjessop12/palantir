@@ -3,6 +3,10 @@
 require_relative '../../lib/palantir'
 
 describe Palantir::Analyzer::Indicators do
+  before do
+    stub_const('ENV', 'TEST' => 'true')
+  end
+
   describe 'analysis_as_hash' do
     let(:input_data) { [*1...20] }
     let(:ticker) { 'PLTR' }

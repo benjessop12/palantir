@@ -3,6 +3,10 @@
 require_relative '../../../lib/palantir'
 
 describe Palantir::Analyzer::Indicators::MovingAverage do
+  before do
+    stub_const('ENV', 'TEST' => 'true')
+  end
+
   context 'when given data' do
     let(:base_data_array) { [*1..20] }
     let(:base_dummy_class) { described_class.new(input_data: base_data_array, ticker: 'PLTR') }

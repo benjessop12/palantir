@@ -12,10 +12,12 @@ namespace :palantir do
     ]
     write_to_config stable_stocks
     query(sql: 'CREATE TABLE IF NOT EXISTS variables (name varchar, value varchar, at_date date, created_at date)')
+    query(sql: 'CREATE TABLE IF NOT EXISTS variables_test (name varchar, value varchar, at_date date, created_at date)')
   end
 
   task :clear_db do
     query(sql: 'DELETE FROM variables')
+    query(sql: 'DELETE FROM variables_test')
   end
 end
 

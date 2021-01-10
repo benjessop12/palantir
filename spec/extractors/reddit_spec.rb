@@ -154,6 +154,38 @@ describe Palantir::Extractors::Reddit do
           end
         end
 
+        describe 'collect_data_for_shill' do
+          context 'with correct data' do
+            let(:correct_data_hash) { { date: '2021-01-01', currency: '100' } }
+            let(:current_price) { 100.0 }
+
+            before do
+              Timecop.freeze(Time.local(2020, 12, 1))
+            end
+
+            after do
+              Timecop.return
+            end
+
+            it 'yields data' do
+              expect(dummy_class.send(
+                       :collect_data_for_shill,
+                       data_hash: correct_data_hash,
+                       current_price: current_price,
+                     ))
+                .to eq(14)
+            end
+          end
+
+          context 'with incorrect date' do
+            let(:incorrect_data_hash) { { date: '1-2', currency: '' } }
+
+            it 'returns nil' do
+              expect(dummy_class.send(:collect_data_for_shill, data_hash: incorrect_data_hash)).to eq(nil)
+            end
+          end
+        end
+
         describe 'strength_of_individual_shill' do
           let(:short_unix_length) { 1_323_213 }
           let(:long_unix_length) { 13_232_130 }

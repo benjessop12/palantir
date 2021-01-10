@@ -48,15 +48,16 @@ module Palantir
     end
 
     def analyze_data(historic_data: nil, ticker: nil)
-      ticker_values = historic_data.map(&:first).map(&:to_f)
+      ticker_values = historic_data.map(&:first).map(&:to_f).reject(&:zero?)
       analysis_as_hash = Palantir::Analyzer::Indicators.analysis_as_hash(input_data: ticker_values, ticker: ticker)
       warn analysis_as_hash.to_s
       logger.write(time: Time.now, message: analysis_as_hash)
     end
 
-    def search_for_information(defined_tickers: nil)
+    def search_for_information(defined_tickers: [])
       # default HIGH for now, since subreddit investing assertions are too weak
-      analysis = Palantir::Extractors::Reddit.new(risk_level: 'HIGH').extract_data
+      analysis = Palantir::Extractors::Reddit.new(risk_level: 'HIGH')
+      analysis.extract_data
       # if ambiguous / no best option, then what
       analyze ticker: analysis.best_option(defined_tickers: defined_tickers)
     end
@@ -79,7 +80,7 @@ module Palantir
 
       search_thread_count = (tickers.count * ELEMENTS * rumour_ratio).to_i
       search_thread_count = 1 if search_thread_count.zero?
-      tickers << ([SEARCH_NODE] * search_thread_count).flatten
+      tickers + [SEARCH_NODE] * search_thread_count
     end
   end
 end

@@ -91,7 +91,7 @@ describe Palantir::Analyzer do
         it 'returns one search_for element with the tickers' do
           expect(base_dummy_class.send(:threads_for_rumour_analysis, tickers: tickers, run_wild: true,
                                                                      rumour_ratio: 0.1)).to eq(
-                                                                       tickers << 'SEARCH_FOR',
+                                                                       tickers + %w[SEARCH_FOR],
                                                                      )
         end
       end
@@ -99,8 +99,8 @@ describe Palantir::Analyzer do
       context 'when the rumour ratio is 0.5' do
         it 'returns three search_for elements with the tickers' do
           expect(base_dummy_class.send(:threads_for_rumour_analysis, tickers: tickers, run_wild: true,
-                                                                     rumour_ratio: 0.1)).to eq(
-                                                                       tickers << (%w[SEARCH_FOR] * 3),
+                                                                     rumour_ratio: 0.5)).to eq(
+                                                                       tickers + %w[SEARCH_FOR] * 3,
                                                                      )
         end
       end
@@ -108,8 +108,8 @@ describe Palantir::Analyzer do
       context 'when the rumour ratio is 0.9' do
         it 'returns six search_for elements with the tickers' do
           expect(base_dummy_class.send(:threads_for_rumour_analysis, tickers: tickers, run_wild: true,
-                                                                     rumour_ratio: 0.1)).to eq(
-                                                                       tickers << (%w[SEARCH_FOR] * 6),
+                                                                     rumour_ratio: 0.9)).to eq(
+                                                                       tickers + %w[SEARCH_FOR] * 5,
                                                                      )
         end
       end

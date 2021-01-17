@@ -48,10 +48,22 @@ module Palantir
     end
 
     def analyze_data(historic_data: nil, ticker: nil)
-      ticker_values = historic_data.map(&:first).map(&:to_f).reject(&:zero?)
-      analysis_as_hash = Palantir::Analyzer::Indicators.analysis_as_hash(input_data: ticker_values, ticker: ticker)
+      ticker_values_short_term = historic_data.map(&:first).map(&:to_f).reject(&:zero?)
+      ticker_values_long_term = ::Palantir::Clients::YahooFinance.new(stock_code: ticker,
+                                                                      start_date: date[:start],
+                                                                      end_date: date[:end]).collect_data
+      analysis_as_hash = Palantir::Analyzer::Indicators.analysis_as_hash(short_term: ticker_values_short_term,
+                                                                         long_term: ticker_values_long_term,
+                                                                         ticker: ticker)
       warn analysis_as_hash.to_s
       logger.write(time: Time.now, message: analysis_as_hash)
+    end
+
+    def date
+      {
+        start: (Date.today - 90).strftime('%Y-%m-%d'),
+        end: (Date.today).strftime('%Y-%m-%d')
+      }
     end
 
     def search_for_information(defined_tickers: [])

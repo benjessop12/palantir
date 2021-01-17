@@ -49,12 +49,14 @@ If it is the first time calculating the exponential moving average and yesterday
 
 The relative strength index is the measure of magnitude of recent price changes and evaluates the overbought or oversold conditions. An RSI of over 70 indicates the ticker is overbought or overvalued and primed for a trend reversal or corrective pullback. An RSI of 30 or below indicates oversold or undervalued condition.
 
+Relative Strength Index is calculated against Yahoo Finance data of a fixed time period of 90 days lookback.
+
 There are two stages to an RSI calculation:
 
 First stage:
 `100 - ( 100 / 1 + ( average_gain / average_loss))`
 
-The average gain or loss used in the calculation is the average percentage gain or loss during a look-back period. The average loss shoild only ever be a positive value and the number of elements of the valculation should always be 14 or more.
+The average gain or loss used in the calculation is the average percentage gain or loss during a look-back period. The average loss shoild only ever be a positive value and the number of elements of the valculation should always be 14 or more. As the time period for this calculation is fixed to 90 days, there will always be more than 14 elements of data to analyze against, unless the stock ticker has not existed for more than 14 days.
 
 Second stage:
 ```
@@ -109,7 +111,7 @@ The Database module wraps queries around a connection and sharelock class, where
 
 ##### Data Extraction
 
-The http client wrapper seeks to deal with _most_ external issues with request and response. There are two key data sources at this current time, which are not ideal but due to the free nature of them they will have to do. Reddit is the shill source, namely some famous subreddits around investing (WSB), as well as google to extract ticker information. Both extraction methods utilize some simple regex to extract tickers, strike prices, mentions and further. Reddit shill sourcing is used to identify plausible trends which could influence where the bot focuses its time.
+The http client wrapper seeks to deal with _most_ external issues with request and response. There are three key data sources at this current time. Reddit is the shill source, namely some famous subreddits around investing (WSB), Yahoo Finance as well as google to extract ticker information. Both extraction methods utilize some simple regex to extract tickers, strike prices, mentions and further. Reddit shill sourcing is used to identify plausible trends which could influence where the bot focuses its time.
 
 Defined tickers are favoured when scraping for trends and reddit shill sourcing has to be explicitly set to be factored into the bot analysis. Each ticker is run on its own thread and there are some minor preventative methods to manage resource allocation on the machine the task is run on but, it will require improvement if someone attempts to look at too many tickers.
 

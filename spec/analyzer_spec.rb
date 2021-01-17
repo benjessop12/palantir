@@ -2,27 +2,14 @@
 
 require 'time'
 require 'timecop'
+require 'webmock'
 
 require_relative '../lib/palantir'
 
 describe Palantir::Analyzer do
+  include WebMock::API
+
   let(:base_dummy_class) { described_class.new(tickers: 'PLTR', interval: 60) }
-
-  describe 'analyze_data' do
-    let(:historic_data) { [%w[1 2021-01-01]] }
-    let(:ticker) { 'PLTR' }
-    let(:stub_hash) { { stub: 'json' }.to_s }
-
-    before do
-      allow(base_dummy_class).to receive(:warn)
-      allow(::Palantir::Analyzer::Indicators).to receive(:analysis_as_hash).and_return(stub_hash)
-    end
-
-    it 'takes an array of arrays with ticker values at timepoints and performs analysis on them and logs to stdout' do
-      base_dummy_class.send(:analyze_data, historic_data: historic_data, ticker: ticker)
-      expect(base_dummy_class).to have_received(:warn).with(stub_hash)
-    end
-  end
 
   describe 'outside_defined_run_constraint' do
     context 'when run_until is defined' do
@@ -113,6 +100,22 @@ describe Palantir::Analyzer do
                                                                      )
         end
       end
+    end
+  end
+
+  describe 'date' do
+    let(:expected_output) { { end: '2021-01-01', start: '2020-10-03' } }
+
+    before do
+      Timecop.freeze(Time.local(2021, 1, 1))
+    end
+
+    after do
+      Timecop.return
+    end
+
+    it 'returns the expected time differences for stock analysis' do
+      expect(base_dummy_class.send(:date)).to eq(expected_output)
     end
   end
 end

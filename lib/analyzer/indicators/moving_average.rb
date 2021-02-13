@@ -48,12 +48,12 @@ module Palantir
         end
 
         def first_time?
-          in_db = Palantir::Database.get_var name: ticker
+          in_db = Palantir::Models::Variables.new.get_var name: ticker
           !in_db.flatten.empty?
         end
 
         def mark_ticker(value: nil)
-          Palantir::Database.save_var name: ticker, value: value
+          Palantir::Models::Variables.new.save_var name: ticker, value: value
           value
         end
 

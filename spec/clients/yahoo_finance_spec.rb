@@ -120,17 +120,11 @@ describe Palantir::Clients::YahooFinance do
   describe 'build_url' do
     let(:expected_output) do
       'https://query1.finance.yahoo.com/v7/finance/download/PLTR?events=history&interval=1d' \
-      '&period1=1609459200&period2=1610236800&crumb=TestCrumb&Cookie=Mock'
+      '&period1=1609459200&period2=1610236800&crumb=TestCrumb'
     end
 
     it 'returns valid ticker url' do
       expect(described_instance.send(:build_url)).to eq(expected_output)
-    end
-  end
-
-  describe 'fetch_cookie' do
-    it 'extracts the cookie' do
-      expect(described_instance.send(:fetch_cookie)).to eq('Mock')
     end
   end
 

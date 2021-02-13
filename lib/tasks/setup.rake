@@ -6,25 +6,47 @@ desc 'Setting up ticker file'
 namespace :palantir do
   task :setup do
     stable_stocks = %w[
-      S&P500
+      SPY
       TSLA
-      RR
     ]
-    write_to_config stable_stocks
-    query(sql: 'CREATE TABLE IF NOT EXISTS variables (name varchar, value varchar, at_date date, created_at date)')
-    query(sql: 'CREATE TABLE IF NOT EXISTS variables_test (name varchar, value varchar, at_date date, created_at date)')
+    write_to_file ::Palantir::TICKER_CONFIG_FILE, stable_stocks.to_yaml
+    ::Palantir::Models::Variables.new.migrate(environment: 'test')
+    ::Palantir::Models::Variables.new.migrate(environment: 'production')
+    ::Palantir::Models::Reports.new.migrate(environment: 'test')
+    ::Palantir::Models::Reports.new.migrate(environment: 'production')
   end
 
   task :clear_db do
-    query(sql: 'DELETE FROM variables')
-    query(sql: 'DELETE FROM variables_test')
+    ::Palantir::Models::Variables.new.clear(environment: 'test')
+    ::Palantir::Models::Variables.new.clear(environment: 'production')
+    ::Palantir::Models::Reports.new.clear(environment: 'test')
+    ::Palantir::Models::Reports.new.clear(environment: 'production')
   end
-end
 
-def write_to_config(tickers)
-  File.open(::Palantir::TICKER_CONFIG_FILE, 'w') { |file| file.write(tickers.to_yaml) }
+  task :setup_email do
+    write_to_file(
+      ::Palantir::EMAIL_CONFIG_FILE,
+      email_body(ENV['EMAIL'], ENV['PASSWORD']),
+    )
+  end
 end
 
 def query(sql: nil)
   ::Palantir::Database.query(sql: sql)
+end
+
+def email_body(email, password)
+  <<~SSMTP_CONFIG
+    root=postmaster
+    mailhub=smtp.gmail.com
+    hostname=palantir
+    AuthUser=#{email}
+    AuthPass=#{password}
+    FromLineOverride=YES
+    UseSTARTTLS=YES
+  SSMTP_CONFIG
+end
+
+def write_to_file(file_path, body)
+  File.open(file_path, 'w') { |file| file.write(body) }
 end

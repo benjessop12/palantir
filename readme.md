@@ -30,6 +30,12 @@ Please note, if a ticker config yaml file is present at run time, all stock tick
 
 This will also set up the postgres tables the run script requires for storing stock and assertion data.
 
+To set up email notifications:
+
+`EMAIL=youremail PASSWORD=password bundle exec rake palantir:setup_email`
+
+You should enable two factor authentication via google and generate an app password to utilise this feature.
+
 #### Analytics
 
 ##### Moving Average

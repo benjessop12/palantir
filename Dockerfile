@@ -1,6 +1,6 @@
 FROM ruby:2.7.1-alpine3.12
 
-RUN apk add --no-cache build-base postgresql postgresql-dev libpq && \
+RUN apk add --no-cache build-base postgresql postgresql-dev libpq ssmtp mailx && \
     adduser -h /app -G users -H -D -u 1000 app && \
     mkdir /app && \
     chown app:users /app && \

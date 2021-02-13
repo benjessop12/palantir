@@ -55,16 +55,7 @@ module Palantir
 
       def build_url
         url = format(QUOTE_ENDPOINT, symbol: stock_code.upcase)
-        url + params.merge(crumb: fetch_crumb).merge(Cookie: fetch_cookie).map { |k, v| "#{k}=#{v}" }.join('&').to_s
-      end
-
-      def fetch_cookie
-        page_data.http_header.instance_variable_get(:@header_item)
-                 .select { |a| a.first == 'Set-Cookie' }
-                 .first
-                 .last
-                 .split('; ', 2)
-                 .first
+        url + params.merge(crumb: fetch_crumb).map { |k, v| "#{k}=#{v}" }.join('&').to_s
       end
 
       def fetch_crumb

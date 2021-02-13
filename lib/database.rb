@@ -11,22 +11,9 @@ module Palantir
 
     extend Connection
 
-    def save_var(name: nil, value: nil, at_date: nil)
-      sql_format = "INSERT INTO #{table_name}(name, value, at_date, created_at) VALUES ('%s', '%s', '%s', '%s')"
-      date = at_date.nil? ? Time.now : at_date
-      sql = format(sql_format, name, value, date.strftime('%Y-%m-%d'), Time.now.strftime('%Y-%m-%d'))
-      query(sql: sql)
-    end
-
-    def get_var(name: nil)
-      sql_format = "SELECT value, at_date FROM #{table_name} WHERE name = '%s'"
-      sql = format(sql_format, name)
-      query(sql: sql, values: true)
-    end
-
     def query(sql: nil, values: nil)
       query = postgresql_connection(config: dbconfig).execute(sql: sql)
-      values ? query.values : query
+      values ? query.to_set.to_a : query
     end
 
     def dbconfig

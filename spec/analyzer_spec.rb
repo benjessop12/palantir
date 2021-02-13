@@ -11,6 +11,85 @@ describe Palantir::Analyzer do
 
   let(:base_dummy_class) { described_class.new(tickers: 'PLTR', interval: 60) }
 
+  describe 'save_report' do
+    context 'when about to report instance variable is false' do
+      before do
+        base_dummy_class.instance_variable_set(:@about_to_report, false)
+      end
+
+      it 'returns nil' do
+        expect(base_dummy_class.send(:save_report)).to eq(nil)
+      end
+    end
+
+    context 'when about to report instance variable is true' do
+      let(:report_instance) { ::Palantir::Analyzer::Reports.new }
+
+      before do
+        allow(::Palantir::Analyzer::Reports).to receive(:new).and_return(report_instance)
+        allow(::Palantir::Database).to receive(:query).and_return([{ key_one: 'date' }])
+        allow(report_instance).to receive(:save!)
+        base_dummy_class.instance_variable_set(:@about_to_report, true)
+        base_dummy_class.instance_variable_set(:@runners, [1])
+      end
+
+      it 'saves the analysis values to the database' do
+        base_dummy_class.send(:save_report)
+        expect(report_instance).to have_received(:save!).once
+      end
+    end
+  end
+
+  describe 'in_reporting_timeline' do
+    after do
+      Timecop.return
+    end
+
+    context 'when the time is within the REPORTING_RANGE' do
+      let(:time_in_range) { Time.local(2021, 1, 1, 21, 1, 0) }
+
+      before do
+        base_dummy_class.instance_variable_set(:@about_to_report, false)
+        Timecop.freeze(time_in_range)
+      end
+
+      context 'when the daily report has run' do
+        before do
+          allow(DateTime).to receive(:now).and_return(time_in_range)
+          base_dummy_class.instance_variable_set(:@last_day_of_report, time_in_range)
+        end
+
+        it 'does not set the about to report variable to true' do
+          base_dummy_class.send(:in_reporting_timeline)
+          expect(base_dummy_class.instance_variable_get(:@about_to_report)).to eq(false)
+        end
+      end
+
+      context 'when the daily report has not run' do
+        before do
+          base_dummy_class.instance_variable_set(:@last_day_of_report, Time.local(2020, 12, 31, 21, 1, 0))
+        end
+
+        it 'sets the about to report variable to true' do
+          base_dummy_class.send(:in_reporting_timeline)
+          expect(base_dummy_class.instance_variable_get(:@about_to_report)).to eq(true)
+        end
+      end
+    end
+
+    context 'when the time is not within the REPORTING_RANGE' do
+      before do
+        Timecop.freeze(Time.local(2021, 1, 1, 0, 0, 0))
+        base_dummy_class.instance_variable_set(:@about_to_report, true)
+      end
+
+      it 'sets the about to report variable to false' do
+        base_dummy_class.send(:in_reporting_timeline)
+        expect(base_dummy_class.instance_variable_get(:@about_to_report)).to eq(false)
+      end
+    end
+  end
+
   describe 'outside_defined_run_constraint' do
     context 'when run_until is defined' do
       before do

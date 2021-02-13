@@ -2,8 +2,15 @@
 
 require_relative '../../../lib/palantir'
 
+require 'timecop'
+
 describe Palantir::Analyzer::Indicators::MovingAverage do
+  let(:variables_model) { Palantir::Models::Variables.new }
+
   before do
+    allow(::Palantir::Database).to receive(:query).and_return([{ key_one: 'name' }, { key_two: 'value' },
+                                                               { key_three: 'at_date' }, { key_four: 'created_at' }])
+    allow(::Palantir::Models::Variables).to receive(:new).and_return(variables_model)
     stub_const('ENV', 'TEST' => 'true')
   end
 
@@ -20,11 +27,11 @@ describe Palantir::Analyzer::Indicators::MovingAverage do
     describe 'exponential' do
       context 'when the input data is on a strong uptrend' do
         before do
-          allow(base_dummy_class).to receive(:first_time?).and_return(false)
+          allow(variables_model).to receive(:get_var?).and_return([])
         end
 
         it 'provides an accurate exponential moving average' do
-          expect(base_dummy_class.exponential.ceil(4)).to eq(0.1765)
+          expect(base_dummy_class.exponential.ceil(4)).to eq(10.0454)
         end
       end
     end
@@ -72,7 +79,7 @@ describe Palantir::Analyzer::Indicators::MovingAverage do
     describe 'first_time?' do
       context 'when the var exists in the database' do
         before do
-          allow(Palantir::Database).to receive(:get_var).and_return([['something']])
+          allow(variables_model).to receive(:get_var).and_return([['something']])
         end
 
         it 'returns true' do
@@ -82,7 +89,7 @@ describe Palantir::Analyzer::Indicators::MovingAverage do
 
       context 'when the var does not exist in the database' do
         before do
-          allow(Palantir::Database).to receive(:get_var).and_return([[]])
+          allow(variables_model).to receive(:get_var).and_return([])
         end
 
         it 'returns false' do
@@ -93,12 +100,17 @@ describe Palantir::Analyzer::Indicators::MovingAverage do
 
     describe 'mark_ticker' do
       before do
-        allow(Palantir::Database).to receive(:save_var)
+        Timecop.freeze(Time.local(2021, 1, 1))
       end
 
-      it 'sends a request to the databse' do
+      let(:expected_query) do
+        { sql: 'INSERT INTO variables_test (name, value, at_date, created_at) ' \
+               "VALUES ('PLTR', 'value', '2021-01-01 00:00:00 +0000', '2021-01-01')" }
+      end
+
+      it 'sends a request to the database' do
         base_dummy_class.send(:mark_ticker, value: 'value')
-        expect(Palantir::Database).to have_received(:save_var).with(name: 'PLTR', value: 'value')
+        expect(Palantir::Database).to have_received(:query).with(expected_query)
       end
     end
 

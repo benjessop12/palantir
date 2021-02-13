@@ -8,6 +8,7 @@ module Palantir
   class Analyzer
     SEARCH_NODE = 'SEARCH_FOR'
     ELEMENTS = 2
+    REPORTING_RANGE = (2100...2200).to_a.freeze # make this configurable
 
     attr_reader :runners, \
                 :run_wild, \
@@ -16,7 +17,10 @@ module Palantir
                 :interval, \
                 :run_until
 
-    attr_accessor :logger
+    attr_accessor :logger, \
+                  :about_to_report,
+                  :last_day_of_report,
+                  :variables_instance
 
     def initialize(tickers: nil, run_wild: nil, rumour_ratio: nil, concurrency: nil, interval: nil, run_until: nil)
       @runners = threads_for_rumour_analysis(tickers: tickers, run_wild: run_wild, rumour_ratio: rumour_ratio)
@@ -24,6 +28,9 @@ module Palantir
       @interval = interval
       @logger = ::Palantir.logger
       @run_until = run_until
+      @about_to_report = false
+      @last_day_of_report = nil
+      @variables_instance = ::Palantir::Models::Variables.new
     end
 
     def analyze!
@@ -37,9 +44,9 @@ module Palantir
     def analyze(ticker: nil)
       run_with_constraints do
         current_data = ::Palantir::Clients::GoogleClient.get_ticker(ticker)
-        ::Palantir::Database.save_var name: ticker, value: current_data[:value], at_date: current_data[:request_time]
-        # TODO: serious oom issues will arise if the below line is not fixed
-        analyze_data historic_data: ::Palantir::Database.get_var(name: ticker), ticker: ticker
+        variables_instance.save_var name: ticker, value: current_data[:value], at_date: current_data[:request_time]
+        in_reporting_timeline
+        analyze_data historic_data: variables_instance.get_vars(name: ticker), ticker: ticker
         # here is where we see a need for a queue
         # in terms of good design
         # sleeping in any ruby script is bad
@@ -48,15 +55,39 @@ module Palantir
     end
 
     def analyze_data(historic_data: nil, ticker: nil)
-      ticker_values_short_term = historic_data.map(&:first).map(&:to_f).reject(&:zero?)
+      ticker_values_short_term = historic_data.map(&:first).map(&:last).map(&:to_f).reject(&:zero?)
       ticker_values_long_term = ::Palantir::Clients::YahooFinance.new(stock_code: ticker,
                                                                       start_date: date[:start],
                                                                       end_date: date[:end]).collect_data
       analysis_as_hash = Palantir::Analyzer::Indicators.analysis_as_hash(short_term: ticker_values_short_term,
                                                                          long_term: ticker_values_long_term,
                                                                          ticker: ticker)
-      warn analysis_as_hash.to_s
+      save_report(ticker: ticker, data_short: ticker_values_short_term, data_long: ticker_values_long_term,
+                  analysis: analysis_as_hash)
       logger.write(time: Time.now, message: analysis_as_hash)
+    end
+
+    def save_report(ticker: nil, data_short: nil, data_long: nil, analysis: nil)
+      return unless about_to_report
+
+      reporter = ::Palantir::Analyzer::Reports.new(
+        ticker: ticker,
+        data_short: data_short,
+        data_long: data_long,
+        analysis: analysis,
+      )
+      reporter.save!
+      reporter.send_email(threads: runners.count)
+    end
+
+    def in_reporting_timeline
+      if REPORTING_RANGE.include? Time.now.strftime('%H%M').to_i
+        today = DateTime.now
+        @about_to_report = true unless today == @last_day_of_report
+        @last_day_of_report = today
+      else
+        @about_to_report = false
+      end
     end
 
     def date

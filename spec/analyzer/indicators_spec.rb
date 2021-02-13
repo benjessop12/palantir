@@ -35,7 +35,7 @@ describe Palantir::Analyzer::Indicators do
     let(:expected_output) do
       {
         simple_moving_average: 10,
-        exponential_moving_average: 0.18455,
+        exponential_moving_average: 10.045,
         ticker: 'PLTR',
         relative_strength_index: {
           rsi_step_one: 100.0,
@@ -47,8 +47,8 @@ describe Palantir::Analyzer::Indicators do
     end
 
     before do
-      allow(::Palantir::Database).to receive(:get_var).and_return([[]])
-      allow(::Palantir::Database).to receive(:save_var)
+      allow(::Palantir::Database).to receive(:query).and_return([{ key_one: 'value' }, { key_two: 'at_date' },
+                                                                 { key_three: 'name' }])
     end
 
     it 'returns the expected hash' do

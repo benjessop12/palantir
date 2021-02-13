@@ -83,7 +83,7 @@ To run the bot
 
 `bundle exec rake palantir:run`
 
-This analysis against the defined tickers and outputs the analysis to stdout.
+This analyzes against the defined tickers and outputs the analysis to stdout.
 
 `INTERVAL=5.seconds`
 
@@ -120,6 +120,10 @@ The Database module wraps queries around a connection and sharelock class, where
 The http client wrapper seeks to deal with _most_ external issues with request and response. There are three key data sources at this current time. Reddit is the shill source, namely some famous subreddits around investing (WSB), Yahoo Finance as well as google to extract ticker information. Both extraction methods utilize some simple regex to extract tickers, strike prices, mentions and further. Reddit shill sourcing is used to identify plausible trends which could influence where the bot focuses its time.
 
 Defined tickers are favoured when scraping for trends and reddit shill sourcing has to be explicitly set to be factored into the bot analysis. Each ticker is run on its own thread and there are some minor preventative methods to manage resource allocation on the machine the task is run on but, it will require improvement if someone attempts to look at too many tickers.
+
+##### Ruby Models
+
+Pure Ruby is always fun. I love active_record and think it is great, but I also love making software layers interact with the database layer. The base model class can be extended by the models to provide functions to interact with the database. The sql generation is rudimentory for now, but the main goal was to provide extra protection between interaction of the database and the software layer. Unfortunately the base class is very tied in to postgres syntax, so if you wanted to use MySQL some edits will be required.
 
 ##### Logger
 

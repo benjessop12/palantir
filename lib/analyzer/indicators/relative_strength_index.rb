@@ -6,25 +6,24 @@ module Palantir
       class RelativeStrengthIndex
         include ::Palantir::HelperFunctions
 
-        TOP_STRENGTH_LEVEL = 100
-        STRENGTH_INCREMENT = 1
+        TOP_STRENGTH_LEVEL = 100.00
+        STRENGTH_INCREMENT = 1.00
         SEGMENT = 2
         MINIMUM_NUMBER_OF_ELEMENTS = 14
 
         attr_reader :input_data, \
                     :count,
-                    :trimmed_count,
-                    :positive_gains,
-                    :negative_trends
+                    :trimmed_count
+
+        attr_accessor :price_changes
 
         def initialize(input_data: nil)
           @input_data = input_data
           @count = input_data&.count.to_i
           @trimmed_count = count - STRENGTH_INCREMENT
-          @positive_gains = []
-          @negative_trends = []
+          @price_changes = []
           raise_unless_expected_data
-          warn("INPUT DATA: #{input_data}")
+          calculate_trends
         end
 
         def analyze
@@ -51,50 +50,34 @@ module Palantir
           end
         end
 
-        def average_median_gain(scope: nil)
-          data(scope: scope).each_cons(SEGMENT).select do |element, subsequent|
-            positive_gains << if element < subsequent
-                                get_percentage_leap(element, subsequent)
-                              else
-                                0
-                              end
+        def calculate_trends(scope: nil)
+          data(scope: scope, array: input_data).each_cons(SEGMENT).select do |former, subsequent|
+            price_changes << (subsequent - former)
           end
-          median_of array_of_ticker_data: positive_gains
-        end
-
-        def average_median_loss(scope: nil)
-          data(scope: scope).each_cons(SEGMENT).select do |element, subsequent|
-            negative_trends << if element > subsequent
-                                 get_percentage_leap(element, subsequent)
-                               else
-                                 0
-                               end
-          end
-          median_of array_of_ticker_data: negative_trends
         end
 
         def average(type: nil, scope: nil)
           case type
           when :gain
-            average_median_gain(scope: scope) / count
+            average_of(array_of_ticker_data: data(scope: scope, array: price_changes).map do |pc|
+                                               pc.positive? ? pc : 0
+                                             end)
           when :loss
-            average_median_loss(scope: scope) / count
+            average_of(array_of_ticker_data: data(scope: scope, array: price_changes).map do |pc|
+                                               pc.negative? ? pc.abs : 0
+                                             end)
           end
         end
 
-        def data(scope: nil)
+        def data(scope: nil, array: nil)
           case scope
           when nil
-            input_data
+            array
           when :current
-            input_data.last(SEGMENT)
+            array.last(SEGMENT)
           when :previous
-            input_data[0...-SEGMENT]
+            array[0...-SEGMENT]
           end
-        end
-
-        def get_percentage_leap(first, last)
-          ((last.to_f - first) / first) * TOP_STRENGTH_LEVEL
         end
 
         def sentiment

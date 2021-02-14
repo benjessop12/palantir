@@ -38,10 +38,10 @@ describe Palantir::Analyzer::Indicators do
         exponential_moving_average: 10.045,
         ticker: 'PLTR',
         relative_strength_index: {
-          rsi_step_one: 100.0,
-          rsi_step_two: 100.0,
+          rsi_step_one: 52.631578947368425,
+          rsi_step_two: 52.794117647058826,
           current: 88.601997,
-          sentiment: :overbought
+          sentiment: :neutral
         }
       }
     end

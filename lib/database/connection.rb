@@ -35,9 +35,7 @@ module Palantir
         end
 
         attr_reader :connection, \
-                    :conn_params, \
-                    :logger,
-                    :config
+                    :logger
 
         def initialize(connection: nil)
           @connection = connection

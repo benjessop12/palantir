@@ -68,6 +68,7 @@ module Palantir
     end
 
     def save_report(ticker: nil, data_short: nil, data_long: nil, analysis: nil)
+      warn analysis.to_json
       return unless about_to_report
 
       reporter = ::Palantir::Analyzer::Reports.new(

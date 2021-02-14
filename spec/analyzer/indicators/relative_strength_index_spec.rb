@@ -58,7 +58,7 @@ describe Palantir::Analyzer::Indicators::RelativeStrengthIndex do
             rsi_step_one: 90,
             rsi_step_two: 89,
             current: 26.5,
-            sentiment: :oversold
+            sentiment: :overbought
           },
         )
       end
@@ -243,8 +243,8 @@ describe Palantir::Analyzer::Indicators::RelativeStrengthIndex do
         allow(dummy_class).to receive(:rsi_step_two).and_return(71)
       end
 
-      it 'returns oversold' do
-        expect(dummy_class.send(:sentiment)).to eq(:oversold)
+      it 'returns overbought' do
+        expect(dummy_class.send(:sentiment)).to eq(:overbought)
       end
     end
 
@@ -253,8 +253,8 @@ describe Palantir::Analyzer::Indicators::RelativeStrengthIndex do
         allow(dummy_class).to receive(:rsi_step_two).and_return(29)
       end
 
-      it 'returns undersold' do
-        expect(dummy_class.send(:sentiment)).to eq(:undersold)
+      it 'returns oversold' do
+        expect(dummy_class.send(:sentiment)).to eq(:oversold)
       end
     end
 

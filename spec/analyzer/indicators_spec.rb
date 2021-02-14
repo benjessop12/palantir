@@ -41,7 +41,7 @@ describe Palantir::Analyzer::Indicators do
           rsi_step_one: 100.0,
           rsi_step_two: 100.0,
           current: 88.601997,
-          sentiment: :oversold
+          sentiment: :overbought
         }
       }
     end

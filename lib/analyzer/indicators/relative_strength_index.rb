@@ -18,17 +18,13 @@ module Palantir
                     :negative_trends
 
         def initialize(input_data: nil)
-          # only analyze against supplied data
-          # never hold data, a.k.a stream it in
-          # assume role of responsibility of this class
-          # not to hold AND analyze, only analyze and
-          # yield analysis
           @input_data = input_data
           @count = input_data&.count.to_i
           @trimmed_count = count - STRENGTH_INCREMENT
           @positive_gains = []
           @negative_trends = []
           raise_unless_expected_data
+          warn("INPUT DATA: #{input_data}")
         end
 
         def analyze
@@ -102,8 +98,8 @@ module Palantir
         end
 
         def sentiment
-          return :oversold if rsi_step_two > 70
-          return :undersold if rsi_step_two < 30
+          return :overbought if rsi_step_two > 70
+          return :oversold if rsi_step_two < 30
 
           :neutral
         end
